@@ -12,7 +12,8 @@ function App() {
       minHeight: "100%",
       display: "flex",
       justifyContent: "center",
-      alignItems: "center"
+      alignItems: "center",
+      width: "100%"
     }}>
       <Routes>
         <Route path="/" element={<LoginScreen />} />

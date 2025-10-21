@@ -16,7 +16,7 @@ const PasswordScreen = () => {
         borderRadius: "10px",
         borderWidth: "2px",
         borderStyle: "solid",
-        width: "360px",
+        width: "100%",
         paddingLeft: "10px",
         backgroundColor: "#212121",
         color: "#fff",
@@ -133,7 +133,7 @@ const PasswordScreen = () => {
                 </div>
             </div>
 
-            <div className="mt-2">
+            <div className="mt-3 w-100">
                 <Button text="Next" />
             </div>
         </div>

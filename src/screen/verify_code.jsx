@@ -17,7 +17,7 @@ const CodeVerifyScreen = () => {
         borderRadius: "10px",
         borderWidth: "2px",
         borderStyle: "solid",
-        width: "360px",
+        width: "100%",
         backgroundColor: "#212121",
         color: "#fff",
         paddingLeft: "10px",

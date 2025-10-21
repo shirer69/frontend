@@ -270,6 +270,7 @@ const LoginScreen = () => {
             boxShadow: "none",
             justifyContent: "center",
             display: "flex",
+            width: "100%",
             alignItems: "center",
             opacity: 0.9,
             "&:hover": {
@@ -392,7 +393,7 @@ const LoginScreen = () => {
         borderRadius: "10px",
         borderWidth: "2px",
         borderStyle: "solid",
-        width: "360px",
+        width: "100%",
         backgroundColor: "#212121",
         color: "#fff",
         paddingLeft: "10px",
@@ -510,7 +511,7 @@ const LoginScreen = () => {
 
             </div>
 
-            <div className="mt-3">
+            <div className="mt-3 w-100">
                 <Button text='Next' />
             </div>
 
