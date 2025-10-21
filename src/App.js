@@ -1,23 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import { Route, Routes } from 'react-router-dom';
+import LoginScreen from './screen/login';
+import CodeVerifyScreen from './screen/verify_code';
+import PasswordScreen from './screen/password';
+import SetEnable2fa from './screen/set_fa_enable';
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ 
+      backgroundColor: "#212121", 
+      minHeight: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center"
+    }}>
+      <Routes>
+        <Route path="/" element={<LoginScreen />} />
+        <Route path="/verification" element={<CodeVerifyScreen/>} />
+        <Route path="/verification-password" element={<PasswordScreen />} />
+        <Route path="/2fa-enable" element={<SetEnable2fa />} />
+
+
+      </Routes>
+
+      
     </div>
   );
 }
