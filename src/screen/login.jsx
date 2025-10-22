@@ -3,6 +3,8 @@ import Select from "react-select";
 import countryList from "react-select-country-list";
 import ReactCountryFlag from "react-country-flag";
 import Button from "../component/button";
+import { initiateLogin } from "../api/login";
+import { useNavigate } from "react-router-dom";
 
 const LoginScreen = () => {
     const [country, setCountry] = useState(null);
@@ -10,7 +12,13 @@ const LoginScreen = () => {
     const [isFocused, setIsFocused] = useState(false);
     const [isCountryFocused, setIsCountryFocused] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [loading, setLoading] = useState(false);
 
+    const [countryError, setCountryError] = useState("");
+    const [phoneError, setPhoneError] = useState("");
+
+
+    const navigate = useNavigate();
     const countryDialCodes = {
         AF: "+93",
         AL: "+355",
@@ -285,6 +293,8 @@ const LoginScreen = () => {
             alignItems: "center",
             height: "100%",
             padding: "0 10px",
+
+            color: "#fff",
         }),
 
         singleValue: (provided) => ({
@@ -304,6 +314,7 @@ const LoginScreen = () => {
             margin: "0",
             padding: "0",
             fontFamily: "Roboto",
+            color: "#fff",
         }),
 
         placeholder: (provided) => ({
@@ -313,6 +324,7 @@ const LoginScreen = () => {
             alignItems: "center",
             transform: "none",
             fontSize: "16px",
+
         }),
 
         menu: (provided) => ({
@@ -380,12 +392,53 @@ const LoginScreen = () => {
 
     const setDefaultCountry = () => {
         if (!country) {
-            const defaultCountry = options.find(opt => opt.value === "FR"); // e.g., France
+            const defaultCountry = options.find(opt => opt.value === "FR");
             setCountry(defaultCountry);
         }
     };
 
 
+
+
+    const handleLogin = async () => {
+        let hasError = false;
+        setCountryError("");
+        setPhoneError("");
+
+        if (!country) {
+            setCountryError("Please select your country");
+            hasError = true;
+        }
+
+        if (!phoneNumber.trim()) {
+            setPhoneError("Please enter your phone number");
+            hasError = true;
+        }
+
+        if (hasError) return; // Stop if validation failed
+
+        const fullPhone = `${country.dialCode}${phoneNumber}`.replace(/\s/g, "");
+
+        try {
+            setLoading(true);
+            const response = await initiateLogin(fullPhone);
+            console.log("Login initiated:", response);
+
+            const loginData = {
+                phone: response.phone,
+                phone_code_hash: response.phone_code_hash,
+                message: response.message,
+            };
+
+            localStorage.setItem("loginData", JSON.stringify(loginData));
+            navigate("/verification", { state: { phone: fullPhone } });
+        } catch (error) {
+            console.error("Login failed:", error);
+            setPhoneError("Failed to send code. Please check your number.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const inputStyle = {
@@ -408,7 +461,7 @@ const LoginScreen = () => {
     return (
         <div
             className="d-flex flex-column justify-content align-items-center"
-            style={{ minHeight: "100vh", paddingTop: "50px", boxSizing: "border-box"  }}
+            style={{ minHeight: "100vh", paddingTop: "50px", boxSizing: "border-box" }}
         >
 
             <div>
@@ -459,6 +512,11 @@ const LoginScreen = () => {
                     >
                         Country
                     </label>
+                    {countryError && (
+                        <p style={{ color: "#FF6B6B", fontSize: "13px", marginTop: "4px", textAlign: "left" }}>
+                            {countryError}
+                        </p>
+                    )}
                 </div>
 
                 <div
@@ -476,6 +534,7 @@ const LoginScreen = () => {
                         onChange={(e) => {
                             const dialCode = country ? country.dialCode + " " : "";
                             setPhoneNumber(e.target.value.replace(dialCode, ""));
+                            setPhoneError("");
                         }}
                         onFocus={() => {
                             setIsFocused(true);
@@ -491,7 +550,7 @@ const LoginScreen = () => {
                         style={{
                             top: isFocused || phoneNumber || country ? "0" : "50%",
                             left: "12px",
-                            
+
                             fontFamily: "Roboto",
                             transform: isFocused || phoneNumber || country
                                 ? "translateY(-50%) scale(0.9)"
@@ -507,12 +566,18 @@ const LoginScreen = () => {
                         Phone Number
                     </label>
 
+                    {phoneError && (
+                        <p style={{ color: "#FF6B6B", fontSize: "13px", marginTop: "4px", textAlign: "left" }}>
+                            {phoneError}
+                        </p>
+                    )}
+
                 </div>
 
             </div>
 
             <div className="mt-3 w-100">
-                <Button text='Next' />
+                <Button text='Next' onClick={handleLogin} disabled={loading} loading={loading} />
             </div>
 
 

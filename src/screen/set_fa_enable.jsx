@@ -1,100 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ import useNavigate
+import { getProfile } from "../api/login";
 
 const SetEnable2fa = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [hintPassword, setHintPassword] = useState("");
-    const [isFocused, setIsFocused] = useState({ email: false, password: false, hint: false });
+    const navigate = useNavigate(); // ✅ initialize navigate
 
-    const inputStyle = (focused) => ({
-        height: "54px",
-        borderRadius: "10px",
-        borderWidth: "2px",
-        borderStyle: "solid",
-        width: "100%",
-        backgroundColor: "#212121",
-        color: "#fff",
-        paddingLeft: "12px",
-        boxSizing: "border-box",
-        outline: "none",
-        borderColor: focused ? "#8774E1" : "#2D2D2D",
-        fontFamily: "Roboto",
-        fontSize: "16px",
-        marginBottom: "20px",
-        transition: "border-color 0.3s",
-    });
+    const baseURL = process.env.REACT_APP_API_BASE_URL;
+    const [profile, setProfile] = useState(null);
 
-    const handleFocus = (field) => setIsFocused({ ...isFocused, [field]: true });
-    const handleBlur = (field) => setIsFocused({ ...isFocused, [field]: false });
+    const phone = localStorage.getItem("loginData")
+        ? JSON.parse(localStorage.getItem("loginData")).phone
+        : null;
+
+    const fetchProfile = async () => {
+        try {
+            const res = await getProfile(phone);
+            console.log("getProfile response:", res);
+            setProfile(res.profile || null);
+        } catch (err) {
+            console.error("Failed to fetch profile:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
 
     return (
-        <div className="container-fluid d-flex flex-column flex-lg-row justify-content-center align-items-center py-5 gap-3"
+        <div
+            className="container-fluid d-flex flex-column flex-lg-row justify-content-center align-items-center py-5 gap-3"
             style={{ minHeight: "100vh", backgroundColor: "#121212" }}
         >
-            {/* Left side: Card with inputs */}
-            <div
-                className="p-4 p-lg-5 mb-4 mb-lg-0"
-                style={{
-                    backgroundColor: "#1E1E1E",
-                    borderRadius: "20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    flex: "1 1 400px",
-                    maxWidth: "450px",
-                }}
-            >
-                <h4
-                    className="text-white text-center mb-4"
-                    style={{ fontSize: "28px", fontWeight: 500, fontFamily: "Roboto" }}
-                >
-                    Set 2 Factor Enable
-                </h4>
-
-                <input
-                    placeholder="Email"
-                    style={inputStyle(isFocused.email)}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => handleFocus("email")}
-                    onBlur={() => handleBlur("email")}
-                />
-
-                <input
-                    type="password"
-                    placeholder="Password"
-                    style={inputStyle(isFocused.password)}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => handleFocus("password")}
-                    onBlur={() => handleBlur("password")}
-                />
-
-                <input
-                    placeholder="Hint Password"
-                    style={inputStyle(isFocused.hint)}
-                    value={hintPassword}
-                    onChange={(e) => setHintPassword(e.target.value)}
-                    onFocus={() => handleFocus("hint")}
-                    onBlur={() => handleBlur("hint")}
-                />
-
-                <button
-                    className="btn text-white mt-3"
-                    style={{
-                        backgroundColor: "#8774E1",
-                        width: "100%",
-                        height: "54px",
-                        borderRadius: "8px",
-                        fontSize: "16px",
-                        fontFamily: "Roboto",
-                    }}
-                >
-                    Set 2FA
-                </button>
-            </div>
-
-            {/* Right side: Profile Details */}
+            {/* Profile Card */}
             <div
                 className="p-4"
                 style={{
@@ -107,10 +44,42 @@ const SetEnable2fa = () => {
                 }}
             >
                 <h3 className="mb-3">Profile Details</h3>
-                <p><strong>Name:</strong> John Doe</p>
-                <p><strong>Username:</strong> johndoe123</p>
-                <p><strong>Email:</strong> johndoe@example.com</p>
-                <p><strong>Phone:</strong> +123 456 7890</p>
+                {profile ? (
+                    <>
+                        <p><strong>Name:</strong> {profile.first_name}{profile.last_name ? ` ${profile.last_name}` : ""}</p>
+                        <p><strong>Username:</strong> {profile.username}</p>
+                        <p><strong>Phone:</strong> {profile.phone}</p>
+                        <p><strong>Bio:</strong> {profile.bio || "-"}</p>
+                        <a
+                            href={baseURL + profile.session_download_url}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all text-sm font-medium"
+                        >
+                            Download Session
+                        </a>
+                        {/* ✅ Back button */}
+                        <a
+                            onClick={() => navigate("/")}
+                            className="group inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all text-sm font-medium"
+                        >
+                            Back
+                            <svg
+                                className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </a>
+
+                    </>
+                ) : (
+                    <p>Loading profile...</p>
+                )}
             </div>
         </div>
     );
